@@ -1,0 +1,13 @@
+<div class="login-container">
+  <h2>Login Cliente Frecuente</h2>
+  <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+    <label>Email:</label>
+    <input type="email" name="email" [(ngModel)]="email" required>
+
+    <label>Contraseña:</label>
+    <input type="password" name="password" [(ngModel)]="password" required>
+
+    <button type="submit">Ingresar</button>
+  </form>
+  <p *ngIf="error" style="color: red;">{{ error }}</p>
+</div>
