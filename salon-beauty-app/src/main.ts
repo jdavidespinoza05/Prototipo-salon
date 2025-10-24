@@ -1,15 +1,13 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
-
 import { AppComponent } from './app/app.component';
-import { LoginComponent } from './app/pages/login/login.component';
-import { DashboardComponent } from './app/pages/dashboard/dashboard.component';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app.routes';
+import { importProvidersFrom } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter([
-      { path: '', component: LoginComponent },
-      { path: 'dashboard', component: DashboardComponent }
-    ])
+    provideRouter(routes),
+    importProvidersFrom(ReactiveFormsModule)
   ]
 });
