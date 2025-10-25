@@ -40,3 +40,38 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# ============================================
+# DATABASE CONFIGURATION (Oracle 11g)
+# ============================================
+
+# Variables de entorno con credenciales
+database/.env
+database/.env.local
+database/.env.*.local
+backend/.env
+backend/.env.local
+backend/.env.*.local
+
+# Backups de base de datos
+database/backups/*
+!database/backups/.gitkeep
+*.dmp
+*.sql.backup
+
+# Logs
+database/logs/*
+!database/logs/.gitkeep
+backend/logs/*
+!backend/logs/.gitkeep
+
+# Docker volumes y datos
+database/oracle-data/
+
+# Archivos temporales
+*.tmp
+*.temp
+.cache/
+
+# Node modules del backend
+backend/node_modules/

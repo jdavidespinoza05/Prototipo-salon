@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  oracle-db:
+    image: oracleinanutshell/oracle-xe-11g
+    container_name: oracle-salon-belleza
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    environment:
+      - ORACLE_ALLOW_REMOTE=true
+      - ORACLE_DISABLE_ASYNCH_IO=true
+    volumes:
+      - oracle-data:/u01/app/oracle
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - salon-network
+    restart: unless-stopped
+    shm_size: 1g
+    deploy:                          # ← AGREGAR ESTO
+      resources:                     # ← AGREGAR ESTO
+        limits:                      # ← AGREGAR ESTO
+          memory: 2G                 # ← AGREGAR ESTO
+        reservations:                # ← AGREGAR ESTO
+          memory: 1G     
+
+  # Descomentar cuando tenga el backend listo
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: backend-salon
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DB_HOST=oracle-db
+  #     - DB_PORT=1521
+  #     - DB_SID=XE
+  #     - DB_USER=salon_user
+  #     - DB_PASSWORD=salon_pass123
+  #   depends_on:
+  #     - oracle-db
+  #   networks:
+  #     - salon-network
+  #   restart: unless-stopped
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: frontend-salon
+  #   ports:
+  #     - "4200:80"
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - salon-network
+  #   restart: unless-stopped
+
+volumes:
+  oracle-data:
+
+networks:
+  salon-network:
+    driver: bridge
