@@ -1,3 +1,4 @@
+CONNECT salon_user/salon_pass123@XE;
 -- ==================================================
 -- Script de Triggers y Procedimientos 
 -- Salón de Belleza - Sistema de Fidelidad

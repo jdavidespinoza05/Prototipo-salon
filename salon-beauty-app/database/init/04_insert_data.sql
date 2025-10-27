@@ -1,3 +1,4 @@
+CONNECT salon_user/salon_pass123@XE;
 -- ==================================================
 -- Script de Datos Iniciales 
 -- Salón de Belleza - Sistema de Fidelidad

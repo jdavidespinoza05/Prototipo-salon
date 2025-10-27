@@ -1,3 +1,5 @@
+CONNECT salon_user/salon_pass123@XE;
+
 -- ==================================================
 -- Script de Creación de Tablas 
 -- Salón de Belleza - Sistema de Fidelidad
