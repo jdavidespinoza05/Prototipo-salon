@@ -3,28 +3,68 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 40px;
-  background-color: black;
+  background-color: #111;       /* fondo negro suave */
   color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .logo {
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
 }
 
 ul {
   list-style: none;
   display: flex;
-  gap: 20px;
+  gap: 30px;                    /* más separación entre enlaces */
   margin: 0;
+  padding: 0;
 }
 
-a {
+ul li a {
   text-decoration: none;
   color: white;
-  transition: color 0.3s;
+  font-weight: 500;
+  font-size: 1rem;
+  position: relative;
+  transition: color 0.3s, transform 0.2s;
 }
 
-a:hover, .active {
-  color: #ff69b4; /* Rosa salón */
+/* efecto hover minimalista con subrayado */
+ul li a::after {
+  content: '';
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: #ff4081;  /* rosa salón */
+  transition: width 0.3s ease-in-out;
+}
+
+ul li a:hover::after,
+ul li a.active::after {
+  width: 100%;
+}
+
+ul li a:hover,
+ul li a.active {
+  color: #ff4081;              /* rosa salón */
+  transform: scale(1.05);
+}
+
+/* Responsivo simple para móviles */
+@media (max-width: 768px) {
+  ul {
+    gap: 15px;
+  }
+
+  .logo {
+    font-size: 1.4rem;
+  }
 }

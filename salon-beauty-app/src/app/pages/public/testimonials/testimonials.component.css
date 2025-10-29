@@ -1,0 +1,45 @@
+.testimonials {
+  padding: 4rem 2rem;
+  background-color: #fdfdfd;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+}
+
+.testimonials h1 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.testimonial-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.testimonial-card {
+  background-color: #fff;
+  padding: 2rem 1.5rem;
+  max-width: 300px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+  cursor: pointer;
+}
+
+.testimonial-card:hover {
+   transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  background-color: #fff0f5;
+}
+
+.quote {
+  font-style: italic;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.author {
+  font-weight: 600;
+  color: #ff4081; /* mismo color de acento que Contacto */
+}
