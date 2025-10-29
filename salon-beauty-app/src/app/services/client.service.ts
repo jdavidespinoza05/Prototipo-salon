@@ -8,6 +8,13 @@ import { Admin, LoginCredentials, LoginResponse, AuthUser } from '../models/admi
 @Injectable({
   providedIn: 'root'
 })
+export class ClientService {
+  clientes = [
+    { email: 'cliente1@mail.com', password: '1234', puntos: 100 },
+    { email: 'cliente2@mail.com', password: 'abcd', puntos: 50 }
+  ];
+}
+
 export class AuthService {
   // URL base del API (ajustar según configuración)
   // Puede ser ORDS o un middleware Express mínimo

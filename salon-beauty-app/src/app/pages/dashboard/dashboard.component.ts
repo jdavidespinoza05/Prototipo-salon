@@ -11,8 +11,4 @@ import { ClientService } from '../../services/client.service';
 })
 export class DashboardComponent {
   cliente: any;
-
-  constructor(private clientService: ClientService) {
-    this.cliente = this.clientService.getClienteActual();
-  }
 }
