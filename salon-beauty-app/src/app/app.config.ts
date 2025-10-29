@@ -9,11 +9,12 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(),
-    // Registrar el interceptor HTTP
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
+    // NOTA: Interceptor desactivado temporalmente para evitar dependencia circular
+    // Descomentar cuando el backend de Oracle esté listo
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: AuthInterceptor,
+    //   multi: true
+    // }
   ]
 };

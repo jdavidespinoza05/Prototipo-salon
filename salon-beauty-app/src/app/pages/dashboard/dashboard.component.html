@@ -1,2 +1,10 @@
-<h2>Bienvenido, {{ cliente.email }}</h2>
-<p>Saldo de puntos: {{ cliente.puntos }}</p>
+<div class="dashboard-container" *ngIf="admin">
+  <h2>Bienvenido, {{ admin.nombre }}</h2>
+  <p>Correo: {{ admin.correo }}</p>
+  <p>Estado: {{ admin.activo === 'S' ? 'Activo' : 'Inactivo' }}</p>
+  <p>Último acceso: {{ admin.ultimo_acceso | date:'short' }}</p>
+</div>
+
+<div class="dashboard-container" *ngIf="!admin">
+  <p>Cargando información del usuario...</p>
+</div>

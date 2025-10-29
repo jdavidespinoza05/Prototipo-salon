@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ClientService } from '../../services/client.service';
+import { AuthService } from '../../services/client.service';
+import { Admin } from '../../models/admin.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,6 +10,12 @@ import { ClientService } from '../../services/client.service';
   standalone: true,
   imports: [CommonModule]
 })
-export class DashboardComponent {
-  cliente: any;
+export class DashboardComponent implements OnInit {
+  admin: Admin | null = null;
+
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.admin = this.authService.getCurrentAdmin();
+  }
 }

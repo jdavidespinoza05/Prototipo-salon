@@ -25,22 +25,23 @@ export class LoginComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: AuthService
   ) {
-    // Si ya está autenticado, redirigir al dashboard
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
-    }
+    // Limpiar sesión al entrar al login (sin redirigir)
+    this.authService.logout(false);
 
-    // Inicializar formulario
+    // Inicializar formulario con valores de prueba (temporal para desarrollo)
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      email: ['admin@salon.com', [Validators.required, Validators.email]],
+      password: ['123456', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   ngOnInit(): void {
+    console.log('LoginComponent initialized');
+    console.log('Current URL:', this.router.url);
+
     // Obtener la URL de retorno desde los query params
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-    
+
     // Verificar si la sesión expiró
     const sessionExpired = this.route.snapshot.queryParams['sessionExpired'];
     if (sessionExpired === 'true') {
@@ -62,6 +63,7 @@ export class LoginComponent implements OnInit {
 
     // Mostrar indicador de carga
     this.loading = true;
+    this.loginForm.disable();
 
     // Preparar credenciales
     const credentials: LoginCredentials = {
@@ -87,6 +89,7 @@ export class LoginComponent implements OnInit {
       },
       error: (error) => {
         this.loading = false;
+        this.loginForm.enable();
         console.error('Error en login:', error);
         
         // Mostrar mensaje de error amigable

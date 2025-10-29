@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
@@ -15,26 +15,42 @@ export class ClientService {
   ];
 }
 
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
   // URL base del API (ajustar según configuración)
   // Puede ser ORDS o un middleware Express mínimo
   private apiUrl = '/api/auth';
-  
+
+  // Modo desarrollo: usa autenticación mock sin backend
+  private readonly DEV_MODE = true; // Cambiar a false cuando tengas Oracle configurado
+
   // BehaviorSubject para mantener el estado del usuario autenticado
   private currentUserSubject: BehaviorSubject<AuthUser | null>;
   public currentUser: Observable<AuthUser | null>;
-  
+
   // Key para localStorage
   private readonly AUTH_KEY = 'salon_auth_user';
 
+  private routerInstance?: Router;
+
   constructor(
     private http: HttpClient,
-    private router: Router
+    private injector: Injector
   ) {
     // Inicializar con datos del localStorage si existen
     const storedUser = this.getUserFromStorage();
     this.currentUserSubject = new BehaviorSubject<AuthUser | null>(storedUser);
     this.currentUser = this.currentUserSubject.asObservable();
+  }
+
+  // Inyección lazy de Router para evitar dependencia circular
+  private get router(): Router {
+    if (!this.routerInstance) {
+      this.routerInstance = this.injector.get(Router);
+    }
+    return this.routerInstance;
   }
 
   /**
@@ -52,12 +68,18 @@ export class AuthService {
   }
 
   /**
-   * Login - Llama al procedimiento almacenado de Oracle
+   * Login - Llama al procedimiento almacenado de Oracle o usa mock en desarrollo
    * @param credentials Credenciales de login
    */
   login(credentials: LoginCredentials): Observable<LoginResponse> {
+    // Si está en modo desarrollo, usar autenticación mock
+    if (this.DEV_MODE) {
+      return this.mockLogin(credentials);
+    }
+
+    // Si no, usar el backend real
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    
+
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials, { headers })
       .pipe(
         tap(response => {
@@ -69,7 +91,7 @@ export class AuthService {
             };
             this.setUserInStorage(authUser);
             this.currentUserSubject.next(authUser);
-            
+
             // Actualizar último acceso en Oracle
             this.updateLastAccess(response.admin.id_admin).subscribe();
           }
@@ -82,17 +104,69 @@ export class AuthService {
   }
 
   /**
+   * Mock Login - Para desarrollo sin backend
+   */
+  private mockLogin(credentials: LoginCredentials): Observable<LoginResponse> {
+    // Simular delay de red
+    return new Observable(observer => {
+      setTimeout(() => {
+        // Credenciales de prueba
+        if (credentials.correo === 'admin@salon.com' && credentials.password === '123456') {
+          const mockAdmin: Admin = {
+            id_admin: 1,
+            nombre: 'Administrador',
+            correo: 'admin@salon.com',
+            activo: 'S',
+            fecha_creacion: new Date(),
+            ultimo_acceso: new Date()
+          };
+
+          const mockToken = 'mock-jwt-token-' + Date.now();
+
+          const authUser: AuthUser = {
+            admin: mockAdmin,
+            token: mockToken
+          };
+
+          // Guardar en localStorage
+          this.setUserInStorage(authUser);
+          this.currentUserSubject.next(authUser);
+
+          const response: LoginResponse = {
+            success: true,
+            message: 'Login exitoso (modo desarrollo)',
+            admin: mockAdmin,
+            token: mockToken
+          };
+
+          observer.next(response);
+          observer.complete();
+        } else {
+          const response: LoginResponse = {
+            success: false,
+            message: 'Correo o contraseña incorrectos'
+          };
+          observer.next(response);
+          observer.complete();
+        }
+      }, 500); // Simular 500ms de delay
+    });
+  }
+
+  /**
    * Logout - Cierra sesión y limpia datos
    */
-  logout(): void {
+  logout(redirect: boolean = true): void {
     // Limpiar localStorage
     this.removeUserFromStorage();
-    
+
     // Limpiar BehaviorSubject
     this.currentUserSubject.next(null);
-    
-    // Redirigir al login
-    this.router.navigate(['/login']);
+
+    // Redirigir al login solo si se solicita
+    if (redirect) {
+      this.router.navigate(['/login']);
+    }
   }
 
   /**
