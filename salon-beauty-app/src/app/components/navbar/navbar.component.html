@@ -1,6 +1,14 @@
 <nav class="navbar">
   <div class="logo">Salon Beauty</div>
   <ul>
+    <!-- Links SOLO PARA ADMIN -->
+    <li *ngIf="isAdmin"><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+    <li *ngIf="isAdmin"><a routerLink="/qr-management" routerLinkActive="active">Códigos QR</a></li>
+
+    <!-- Links PARA USUARIOS NORMALES -->
+    <li *ngIf="!isAdmin"><a routerLink="/mis-puntos" routerLinkActive="active">Mis Puntos</a></li>
+
+    <!-- Links PARA TODOS -->
     <li><a routerLink="/home" routerLinkActive="active">Inicio</a></li>
     <li><a routerLink="/services" routerLinkActive="active">Servicios</a></li>
     <li><a routerLink="/gallery" routerLinkActive="active">Galería</a></li>

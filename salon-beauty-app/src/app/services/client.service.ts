@@ -144,6 +144,7 @@ export class AuthService {
             nombre: 'Administrador',
             correo: 'admin@salon.com',
             activo: 'S',
+            rol: 'admin',
             fecha_creacion: new Date(),
             ultimo_acceso: new Date()
           };

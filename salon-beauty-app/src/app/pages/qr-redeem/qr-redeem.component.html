@@ -1,0 +1,120 @@
+<div class="redeem-wrapper">
+  <div class="redeem-container">
+    <!-- Logo o título -->
+    <div class="header">
+      <h1>Salón de Belleza</h1>
+      <p class="subtitle">Canjea tu código QR</p>
+    </div>
+
+    <!-- Formulario de Canje (solo si no hay éxito) -->
+    <div class="redeem-form" *ngIf="!success">
+      <div class="qr-icon">
+        <div class="qr-square">
+          <span class="qr-symbol">QR</span>
+        </div>
+      </div>
+
+      <p class="instructions">
+        Ingresa tu correo electrónico para canjear tus puntos
+      </p>
+
+      <form [formGroup]="redeemForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="correo">Correo Electrónico</label>
+          <input
+            type="email"
+            id="correo"
+            formControlName="correo_cliente"
+            placeholder="tu@email.com"
+            [disabled]="loading">
+
+          <div class="error-msg" *ngIf="submitted && f['correo_cliente'].errors">
+            <small *ngIf="f['correo_cliente'].errors['required']">
+              El correo es obligatorio
+            </small>
+            <small *ngIf="f['correo_cliente'].errors['email']">
+              Ingresa un correo válido
+            </small>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn-redeem"
+          [disabled]="loading">
+          <span *ngIf="!loading">Canjear Código</span>
+          <span *ngIf="loading">Procesando...</span>
+        </button>
+      </form>
+
+      <!-- Mensaje de Error -->
+      <div class="error-box" *ngIf="error && !requireRegistration">
+        <h3>Error al Canjear</h3>
+        <p>{{ errorMessage }}</p>
+        <button class="btn-retry" (click)="error = false; redeemForm.reset()">
+          Intentar de Nuevo
+        </button>
+      </div>
+
+      <!-- Mensaje de Registro Requerido -->
+      <div class="register-box" *ngIf="requireRegistration">
+        <h3>Cuenta Requerida</h3>
+        <p>{{ errorMessage }}</p>
+        <a [routerLink]="['/register']" [queryParams]="{qr: token}" class="btn-register">
+          Crear Cuenta
+        </a>
+        <p class="login-link">
+          ¿Ya tienes cuenta? <a [routerLink]="['/login']">Inicia sesión</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Mensaje de Éxito -->
+    <div class="success-box" *ngIf="success && redeemData">
+      <div class="success-animation">
+        <div class="checkmark-circle">
+          <div class="checkmark">OK</div>
+        </div>
+      </div>
+
+      <h2 class="success-title">Código Canjeado</h2>
+      <p class="success-message">Has ganado puntos en tu cuenta</p>
+
+      <div class="points-display">
+        <div class="points-change">
+          <div class="points-before">
+            <span class="label">Puntos anteriores</span>
+            <span class="value">{{ redeemData.puntos_anteriores }}</span>
+          </div>
+
+          <div class="points-arrow">→</div>
+
+          <div class="points-after">
+            <span class="label">Puntos nuevos</span>
+            <span class="value highlight">{{ redeemData.puntos_nuevos }}</span>
+          </div>
+        </div>
+
+        <div class="points-added">
+          <span class="plus">+{{ redeemData.puntos_aplicados }}</span>
+          <span class="label-small">puntos añadidos</span>
+        </div>
+      </div>
+
+      <div class="client-info">
+        <p><strong>Cliente:</strong> {{ redeemData.cliente.nombre }}</p>
+        <p><strong>Correo:</strong> {{ redeemData.cliente.correo }}</p>
+      </div>
+
+      <div class="success-footer">
+        <p class="thank-you">Gracias por tu preferencia</p>
+        <p class="visit-us">Te esperamos en tu próxima visita</p>
+      </div>
+    </div>
+
+    <!-- Token Info (para debug en desarrollo) -->
+    <div class="token-info" *ngIf="token && !success">
+      <small>Código: {{ token.substring(0, 8) }}...</small>
+    </div>
+  </div>
+</div>

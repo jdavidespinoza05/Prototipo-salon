@@ -1,11 +1,12 @@
 /**
- * Modelo de datos para Administrador
+ * Modelo de datos para Administrador/Usuario
  */
 export interface Admin {
   id_admin: number;
   nombre: string;
   correo: string;
   activo: 'S' | 'N';
+  rol: 'admin' | 'usuario';
   fecha_creacion: Date;
   ultimo_acceso?: Date;
 }

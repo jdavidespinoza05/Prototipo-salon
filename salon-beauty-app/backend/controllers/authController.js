@@ -22,7 +22,7 @@ async function login(req, res) {
 
     // Buscamos en la base de datos si existe un admin con ese correo
     const userResult = await pool.query(
-      `SELECT id_admin, nombre, correo, password_hash, activo, fecha_creacion, ultimo_acceso
+      `SELECT id_admin, nombre, correo, password_hash, activo, rol, fecha_creacion, ultimo_acceso
        FROM administradores
        WHERE correo = $1`,
       [correo]
@@ -43,6 +43,7 @@ async function login(req, res) {
     const email = userData.correo;
     const password_hash = userData.password_hash;
     const activo = userData.activo;
+    const rol = userData.rol || 'usuario';
     const fecha_creacion = userData.fecha_creacion;
     const ultimo_acceso = userData.ultimo_acceso;
 
@@ -73,6 +74,7 @@ async function login(req, res) {
       nombre: nombre,
       correo: email,
       activo: activo,
+      rol: rol,
       fecha_creacion: fecha_creacion,
       ultimo_acceso: ultimo_acceso
     };
@@ -83,7 +85,8 @@ async function login(req, res) {
       {
         id_admin: admin.id_admin,
         correo: admin.correo,
-        nombre: admin.nombre
+        nombre: admin.nombre,
+        rol: admin.rol
       },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
@@ -242,11 +245,11 @@ async function register(req, res) {
     const saltRounds = 10;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
-    // Insertar el nuevo administrador en la base de datos
+    // Insertar el nuevo administrador en la base de datos con rol 'usuario' por defecto
     const result = await pool.query(
-      `INSERT INTO administradores (nombre, correo, password_hash, activo)
-       VALUES ($1, $2, $3, 'S')
-       RETURNING id_admin, nombre, correo, fecha_creacion, activo`,
+      `INSERT INTO administradores (nombre, correo, password_hash, activo, rol)
+       VALUES ($1, $2, $3, 'S', 'usuario')
+       RETURNING id_admin, nombre, correo, rol, fecha_creacion, activo`,
       [nombre.trim(), correo.toLowerCase(), password_hash]
     );
 
@@ -257,7 +260,8 @@ async function register(req, res) {
       {
         id_admin: newAdmin.id_admin,
         correo: newAdmin.correo,
-        nombre: newAdmin.nombre
+        nombre: newAdmin.nombre,
+        rol: newAdmin.rol
       },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
@@ -272,6 +276,7 @@ async function register(req, res) {
         nombre: newAdmin.nombre,
         correo: newAdmin.correo,
         activo: newAdmin.activo,
+        rol: newAdmin.rol,
         fecha_creacion: newAdmin.fecha_creacion,
         ultimo_acceso: null
       },

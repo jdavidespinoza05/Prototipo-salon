@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
+const qrRoutes = require('./routes/qr');
+const clienteRoutes = require('./routes/cliente');
 const db = require('./config/db');
 
 // Cargamos las variables de entorno del archivo .env
@@ -31,6 +33,12 @@ app.use((req, res, next) => {
 
 // Aquí montamos las rutas de autenticación (login, verify, etc.)
 app.use('/api/auth', authRoutes);
+
+// Rutas de códigos QR
+app.use('/api/qr', qrRoutes);
+
+// Rutas de clientes (puntos, historial)
+app.use('/api/cliente', clienteRoutes);
 
 // Una ruta simple para verificar que el servidor está vivo
 app.get('/health', (req, res) => {
