@@ -1,24 +1,30 @@
-version: '3.8'
-
 services:
   oracle-db:
-    image: wnameless/oracle-xe-11g-r2:latest
+    image: gvenzl/oracle-xe:21-slim
     container_name: oracle-salon-belleza
     ports:
       - "1521:1521"
-      - "8080:8080"
     environment:
-      - ORACLE_ALLOW_REMOTE=true
+      - ORACLE_PASSWORD=OraclePass123
+      - APP_USER=salon_user
+      - APP_USER_PASSWORD=salon_pass123
+      - ORACLE_CHARACTERSET=AL32UTF8
     volumes:
-      - oracle-data:/u01/app/oracle
-      - ./init:/docker-entrypoint-initdb.d
+      - oracle-data:/opt/oracle/oradata
+      - ./init:/container-entrypoint-initdb.d
     networks:
       - salon-network
     restart: unless-stopped
     shm_size: 1g
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 volumes:
   oracle-data:
+    driver: local
 
 networks:
   salon-network:

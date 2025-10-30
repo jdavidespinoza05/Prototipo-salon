@@ -24,7 +24,7 @@ export class AuthService {
   private apiUrl = '/api/auth';
 
   // Modo desarrollo: usa autenticación mock sin backend
-  private readonly DEV_MODE = true; // Cambiar a false cuando tengas Oracle configurado
+  private readonly DEV_MODE = false; // Cambiado a false - ahora usa el backend real con Oracle
 
   // BehaviorSubject para mantener el estado del usuario autenticado
   private currentUserSubject: BehaviorSubject<AuthUser | null>;

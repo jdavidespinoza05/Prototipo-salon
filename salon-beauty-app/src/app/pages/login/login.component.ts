@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
     // Inicializar formulario con valores de prueba (temporal para desarrollo)
     this.loginForm = this.fb.group({
       email: ['admin@salon.com', [Validators.required, Validators.email]],
-      password: ['123456', [Validators.required, Validators.minLength(6)]],
+      password: ['admin123', [Validators.required, Validators.minLength(6)]],
     });
   }
 
