@@ -8,9 +8,9 @@ const bcrypt = require('bcrypt');
 // 5. ¡Listo! Ya puedes hacer login con ese nuevo admin
 
 const nuevoAdmin = {
-  nombre: 'Juan Pérez',
-  correo: 'juan.perez@salon.com',
-  password: 'password123'
+  nombre: 'Administrador',
+  correo: 'admin@salon.com',
+  password: 'admin123'
 };
 
 async function crearHash() {

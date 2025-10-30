@@ -12,7 +12,10 @@
       "Bash(dir \"C:\\Semestre 4\\Reque\\Prototipo-salon\" /s /b)",
       "Bash(findstr:*)",
       "Bash(powershell:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(node server.js:*)",
+      "Bash(npm install:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
