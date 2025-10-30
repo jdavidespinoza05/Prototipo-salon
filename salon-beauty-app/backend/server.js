@@ -63,7 +63,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`✓ Servidor ejecutándose en http://localhost:${PORT}`);
   console.log(`✓ Ambiente: ${process.env.NODE_ENV}`);
-  console.log(`✓ Conectando a Oracle: ${process.env.DB_CONNECTION_STRING}`);
+  console.log(`✓ Base de datos: PostgreSQL`);
 });
 
 // Estas dos funciones se encargan de cerrar todo ordenadamente cuando apagamos el servidor

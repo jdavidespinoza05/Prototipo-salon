@@ -15,7 +15,8 @@
       "Bash(rm:*)",
       "Bash(node server.js:*)",
       "Bash(npm install:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(docker-compose build:*)"
     ],
     "deny": [],
     "ask": []

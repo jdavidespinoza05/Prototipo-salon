@@ -5,6 +5,9 @@ const authController = require('../controllers/authController');
 // POST /api/auth/login - Login de administrador
 router.post('/login', authController.login);
 
+// POST /api/auth/register - Registro de nuevo administrador
+router.post('/register', authController.register);
+
 // POST /api/auth/verify-token - Verificar token JWT
 router.post('/verify-token', authController.verifyToken);
 

@@ -1,4 +1,3 @@
-const oracledb = require('oracledb');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
@@ -17,18 +16,16 @@ async function login(req, res) {
     });
   }
 
-  let connection;
-
   try {
-    // Sacamos una conexión del pool (como pedir prestado un carrito del súper)
-    connection = await db.getPool().getConnection();
+    // Obtenemos el pool de conexiones
+    const pool = db.getPool();
 
     // Buscamos en la base de datos si existe un admin con ese correo
-    const userResult = await connection.execute(
-      `SELECT id_admin, nombre, correo, password_hash, activo
+    const userResult = await pool.query(
+      `SELECT id_admin, nombre, correo, password_hash, activo, fecha_creacion, ultimo_acceso
        FROM administradores
-       WHERE correo = :correo`,
-      { correo: correo }
+       WHERE correo = $1`,
+      [correo]
     );
 
     // Si no encontramos a nadie con ese correo, ya sabemos que algo está mal
@@ -41,11 +38,13 @@ async function login(req, res) {
 
     // Extraemos los datos que nos devolvió la consulta
     const userData = userResult.rows[0];
-    const id_admin = userData[0];
-    const nombre = userData[1];
-    const email = userData[2];
-    const password_hash = userData[3];
-    const activo = userData[4];
+    const id_admin = userData.id_admin;
+    const nombre = userData.nombre;
+    const email = userData.correo;
+    const password_hash = userData.password_hash;
+    const activo = userData.activo;
+    const fecha_creacion = userData.fecha_creacion;
+    const ultimo_acceso = userData.ultimo_acceso;
 
     // Revisamos que el usuario no esté desactivado
     if (activo !== 'S') {
@@ -68,22 +67,14 @@ async function login(req, res) {
     }
 
     // Si llegamos hasta aquí es porque todo está bien
-    // Traemos info adicional del admin (cuándo se registró y cuándo entró por última vez)
-    const adminFullData = await connection.execute(
-      `SELECT fecha_creacion, ultimo_acceso
-       FROM administradores
-       WHERE id_admin = :id_admin`,
-      { id_admin: id_admin }
-    );
-
     // Armamos un objeto con toda la info del admin
     const admin = {
       id_admin: id_admin,
       nombre: nombre,
       correo: email,
       activo: activo,
-      fecha_creacion: adminFullData.rows[0][0],
-      ultimo_acceso: adminFullData.rows[0][1]
+      fecha_creacion: fecha_creacion,
+      ultimo_acceso: ultimo_acceso
     };
 
     // Creamos el token JWT que el usuario va a usar para las próximas peticiones
@@ -99,12 +90,11 @@ async function login(req, res) {
     );
 
     // Actualizamos en la BD la fecha de último acceso
-    await connection.execute(
+    await pool.query(
       `UPDATE administradores
-       SET ultimo_acceso = SYSDATE
-       WHERE id_admin = :id_admin`,
-      { id_admin: admin.id_admin },
-      { autoCommit: true }
+       SET ultimo_acceso = CURRENT_TIMESTAMP
+       WHERE id_admin = $1`,
+      [admin.id_admin]
     );
 
     // Y finalmente mandamos todo de vuelta: los datos del admin y su token
@@ -122,15 +112,6 @@ async function login(req, res) {
       message: 'Error en el servidor',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
-  } finally {
-    // Siempre devolvemos la conexión al pool, pase lo que pase
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('Error cerrando conexión:', err);
-      }
-    }
   }
 }
 
@@ -161,7 +142,6 @@ async function verifyToken(req, res) {
 }
 
 // Función para actualizar manualmente la fecha de último acceso de un admin
-// Aunque normalmente esto se hace automáticamente en el login
 async function updateLastAccess(req, res) {
   const { adminId } = req.body;
 
@@ -172,27 +152,18 @@ async function updateLastAccess(req, res) {
     });
   }
 
-  let connection;
-
   try {
-    connection = await db.getPool().getConnection();
+    const pool = db.getPool();
 
-    const result = await connection.execute(
-      `BEGIN
-        sp_update_ultimo_acceso(
-          p_id_admin => :adminId,
-          p_resultado => :resultado
-        );
-      END;`,
-      {
-        adminId: adminId,
-        resultado: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 500 }
-      }
+    const result = await pool.query(
+      `UPDATE administradores
+       SET ultimo_acceso = CURRENT_TIMESTAMP
+       WHERE id_admin = $1
+       RETURNING id_admin`,
+      [adminId]
     );
 
-    const { resultado } = result.outBinds;
-
-    if (resultado.startsWith('SUCCESS')) {
+    if (result.rows.length > 0) {
       res.json({
         success: true,
         message: 'Último acceso actualizado'
@@ -200,7 +171,7 @@ async function updateLastAccess(req, res) {
     } else {
       res.status(400).json({
         success: false,
-        message: resultado
+        message: 'Administrador no encontrado'
       });
     }
 
@@ -210,19 +181,116 @@ async function updateLastAccess(req, res) {
       success: false,
       message: 'Error en el servidor'
     });
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('Error cerrando conexión:', err);
-      }
+  }
+}
+
+// Función de registro de nuevos administradores
+// Valida los datos, encripta la contraseña y crea el usuario en la BD
+async function register(req, res) {
+  const { nombre, correo, password } = req.body;
+
+  // Validar que todos los campos estén presentes
+  if (!nombre || !correo || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Nombre, correo y contraseña son requeridos'
+    });
+  }
+
+  // Validar formato de correo
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(correo)) {
+    return res.status(400).json({
+      success: false,
+      message: 'El formato del correo no es válido'
+    });
+  }
+
+  // Validar longitud de la contraseña
+  if (password.length < 6) {
+    return res.status(400).json({
+      success: false,
+      message: 'La contraseña debe tener al menos 6 caracteres'
+    });
+  }
+
+  // Validar longitud del nombre
+  if (nombre.trim().length < 3) {
+    return res.status(400).json({
+      success: false,
+      message: 'El nombre debe tener al menos 3 caracteres'
+    });
+  }
+
+  try {
+    const pool = db.getPool();
+
+    // Verificar si el correo ya existe
+    const existingUser = await pool.query(
+      'SELECT id_admin FROM administradores WHERE correo = $1',
+      [correo]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'El correo ya está registrado'
+      });
     }
+
+    // Encriptar la contraseña usando bcrypt
+    const saltRounds = 10;
+    const password_hash = await bcrypt.hash(password, saltRounds);
+
+    // Insertar el nuevo administrador en la base de datos
+    const result = await pool.query(
+      `INSERT INTO administradores (nombre, correo, password_hash, activo)
+       VALUES ($1, $2, $3, 'S')
+       RETURNING id_admin, nombre, correo, fecha_creacion, activo`,
+      [nombre.trim(), correo.toLowerCase(), password_hash]
+    );
+
+    const newAdmin = result.rows[0];
+
+    // Crear token JWT para el nuevo usuario
+    const token = jwt.sign(
+      {
+        id_admin: newAdmin.id_admin,
+        correo: newAdmin.correo,
+        nombre: newAdmin.nombre
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    // Devolver los datos del nuevo administrador y su token
+    res.status(201).json({
+      success: true,
+      message: 'Registro exitoso',
+      admin: {
+        id_admin: newAdmin.id_admin,
+        nombre: newAdmin.nombre,
+        correo: newAdmin.correo,
+        activo: newAdmin.activo,
+        fecha_creacion: newAdmin.fecha_creacion,
+        ultimo_acceso: null
+      },
+      token: token
+    });
+
+  } catch (error) {
+    console.error('Error en registro:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error en el servidor',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 }
 
 module.exports = {
   login,
+  register,
   verifyToken,
   updateLastAccess
 };

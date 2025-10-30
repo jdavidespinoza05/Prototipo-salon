@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { Admin, LoginCredentials, LoginResponse, AuthUser } from '../models/admin.model';
+import { Admin, LoginCredentials, LoginResponse, AuthUser, RegisterData, RegisterResponse } from '../models/admin.model';
 
 @Injectable({
   providedIn: 'root'
@@ -99,6 +99,33 @@ export class AuthService {
         catchError(error => {
           console.error('Error en login:', error);
           return throwError(() => new Error(error.error?.message || 'Error al iniciar sesión'));
+        })
+      );
+  }
+
+  /**
+   * Register - Registra un nuevo administrador
+   * @param registerData Datos de registro
+   */
+  register(registerData: RegisterData): Observable<RegisterResponse> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, registerData, { headers })
+      .pipe(
+        tap(response => {
+          if (response.success && response.admin && response.token) {
+            // Guardar usuario y token automáticamente después del registro
+            const authUser: AuthUser = {
+              admin: response.admin,
+              token: response.token
+            };
+            this.setUserInStorage(authUser);
+            this.currentUserSubject.next(authUser);
+          }
+        }),
+        catchError(error => {
+          console.error('Error en registro:', error);
+          return throwError(() => new Error(error.error?.message || 'Error al registrar el usuario'));
         })
       );
   }
