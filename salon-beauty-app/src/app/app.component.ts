@@ -16,15 +16,13 @@ export class AppComponent {
   showNavbar = false;
 
   constructor(private router: Router) {
-    // Verificar la ruta inicial
-    this.showNavbar = !this.router.url.includes('/login');
-
-    // Detectar cambios de ruta para mostrar/ocultar navbar
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      // Ocultar navbar solo en la página de login
-      this.showNavbar = !event.url.includes('/login');
-    });
+    // Escuchar los cambios de navegación
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        // Mostrar navbar solo si NO estamos en login, register o forgot-password
+        const hiddenRoutes = ['/login', '/register', '/forgot-password'];
+        this.showNavbar = !hiddenRoutes.some(route => event.urlAfterRedirects.includes(route));
+      });
   }
 }
