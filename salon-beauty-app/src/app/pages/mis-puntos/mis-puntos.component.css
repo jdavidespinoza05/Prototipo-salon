@@ -1,0 +1,198 @@
+.puntos-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px 20px;
+}
+
+.puntos-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  margin: 0 0 10px 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.loading, .error-box {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.error-box h3 {
+  color: #f44336;
+  margin: 0 0 10px 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.puntos-card {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.card-header h2 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.email {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.puntos-display {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.puntos-numero {
+  font-size: 64px;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.puntos-label {
+  font-size: 18px;
+  color: white;
+  opacity: 0.9;
+  margin-top: 10px;
+}
+
+.card-footer {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.sin-puntos-card {
+  background: white;
+  border-radius: 16px;
+  padding: 60px 30px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.sin-puntos-card h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.sin-puntos-card p {
+  margin: 0;
+  color: #666;
+}
+
+.historial-section {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.historial-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 22px;
+  color: #333;
+}
+
+.canjes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.canje-item {
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 15px;
+  transition: all 0.3s;
+}
+
+.canje-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.canje-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.fecha {
+  font-size: 13px;
+  color: #666;
+}
+
+.puntos-badge {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.canje-body p {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 15px;
+}
+
+.canje-footer {
+  color: #666;
+  font-size: 13px;
+}
+
+.sin-canjes {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .puntos-wrapper {
+    padding: 20px 10px;
+  }
+
+  .header h1 {
+    font-size: 26px;
+  }
+
+  .puntos-numero {
+    font-size: 48px;
+  }
+
+  .puntos-card, .historial-section {
+    padding: 20px;
+  }
+}

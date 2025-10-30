@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { Admin, LoginCredentials, LoginResponse, AuthUser } from '../models/admin.model';
+import { Admin, LoginCredentials, LoginResponse, AuthUser, RegisterData, RegisterResponse } from '../models/admin.model';
 
 @Injectable({
   providedIn: 'root'
@@ -104,6 +104,33 @@ export class AuthService {
   }
 
   /**
+   * Register - Registra un nuevo administrador
+   * @param registerData Datos de registro
+   */
+  register(registerData: RegisterData): Observable<RegisterResponse> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, registerData, { headers })
+      .pipe(
+        tap(response => {
+          if (response.success && response.admin && response.token) {
+            // Guardar usuario y token automáticamente después del registro
+            const authUser: AuthUser = {
+              admin: response.admin,
+              token: response.token
+            };
+            this.setUserInStorage(authUser);
+            this.currentUserSubject.next(authUser);
+          }
+        }),
+        catchError(error => {
+          console.error('Error en registro:', error);
+          return throwError(() => new Error(error.error?.message || 'Error al registrar el usuario'));
+        })
+      );
+  }
+
+  /**
    * Mock Login - Para desarrollo sin backend
    */
   private mockLogin(credentials: LoginCredentials): Observable<LoginResponse> {
@@ -117,6 +144,7 @@ export class AuthService {
             nombre: 'Administrador',
             correo: 'admin@salon.com',
             activo: 'S',
+            rol: 'admin',
             fecha_creacion: new Date(),
             ultimo_acceso: new Date()
           };

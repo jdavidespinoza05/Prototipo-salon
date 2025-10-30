@@ -1,0 +1,300 @@
+<div class="qr-management-container">
+  <div class="header">
+    <h1>Gestión de Códigos QR</h1>
+    <button class="btn-primary" (click)="openGenerateModal()">
+      + Generar Nuevo QR
+    </button>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="stats-grid" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.total_qrs }}</div>
+      <div class="stat-label">Total QRs</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-value">{{ stats.qrs_validos }}</div>
+      <div class="stat-label">Válidos</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-value">{{ stats.qrs_invalidos }}</div>
+      <div class="stat-label">Inválidos</div>
+    </div>
+    <div class="stat-card warning">
+      <div class="stat-value">{{ stats.qrs_expirados }}</div>
+      <div class="stat-label">Expirados</div>
+    </div>
+    <div class="stat-card info">
+      <div class="stat-value">{{ stats.total_canjes }}</div>
+      <div class="stat-label">Total Canjes</div>
+    </div>
+    <div class="stat-card primary">
+      <div class="stat-value">{{ stats.puntos_canjeados }}</div>
+      <div class="stat-label">Puntos Canjeados</div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters">
+    <button
+      class="filter-btn"
+      [class.active]="filterEstado === ''"
+      (click)="applyFilter('')">
+      Todos
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="filterEstado === 'valido'"
+      (click)="applyFilter('valido')">
+      Válidos
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="filterEstado === 'invalido'"
+      (click)="applyFilter('invalido')">
+      Inválidos
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="filterEstado === 'expirado'"
+      (click)="applyFilter('expirado')">
+      Expirados
+    </button>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    Cargando códigos QR...
+  </div>
+
+  <!-- Lista de QRs -->
+  <div class="qr-list" *ngIf="!loading">
+    <div class="qr-card" *ngFor="let qr of qrcodes">
+      <div class="qr-header">
+        <div class="qr-info">
+          <h3>QR #{{ qr.id_qr }}</h3>
+          <span class="badge" [ngClass]="getEstadoBadgeClass(qr.estado)">
+            {{ getEstadoIcon(qr.estado) }} {{ qr.estado | uppercase }}
+          </span>
+        </div>
+        <div class="qr-points">
+          <span class="points-value">{{ qr.puntos }}</span>
+          <span class="points-label">puntos</span>
+        </div>
+      </div>
+
+      <div class="qr-body">
+        <p class="qr-description" *ngIf="qr.descripcion">
+          <strong>Descripción:</strong> {{ qr.descripcion }}
+        </p>
+        <div class="qr-details">
+          <div class="detail-item">
+            <span class="detail-label">Creado:</span>
+            <span class="detail-value">{{ qr.fecha_creacion | date:'short' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="qr.fecha_expiracion">
+            <span class="detail-label">Expira:</span>
+            <span class="detail-value">{{ qr.fecha_expiracion | date:'short' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Veces usado:</span>
+            <span class="detail-value">{{ qr.veces_usado }}</span>
+          </div>
+          <div class="detail-item" *ngIf="qr.uso_multiple">
+            <span class="badge badge-info">Uso Múltiple</span>
+          </div>
+        </div>
+        <div class="qr-details" *ngIf="qr.cliente_nombre">
+          <div class="detail-item">
+            <span class="detail-label">Canjeado por:</span>
+            <span class="detail-value">{{ qr.cliente_nombre }} ({{ qr.cliente_correo }})</span>
+          </div>
+          <div class="detail-item" *ngIf="qr.fecha_canje">
+            <span class="detail-label">Fecha canje:</span>
+            <span class="detail-value">{{ qr.fecha_canje | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="qr-actions">
+        <button class="btn-secondary" (click)="viewQR(qr)">
+          Ver QR
+        </button>
+        <button
+          class="btn-warning"
+          (click)="regenerateQR(qr)"
+          *ngIf="qr.estado === 'invalido' || qr.estado === 'expirado'">
+          Regenerar
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="qrcodes.length === 0">
+      <p>No hay códigos QR {{ filterEstado ? 'con ese estado' : 'generados' }}</p>
+      <button class="btn-primary" (click)="openGenerateModal()">
+        Generar primer QR
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Generación -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Generar Nuevo Código QR</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form [formGroup]="generateForm" (ngSubmit)="onSubmitGenerate()">
+      <div class="form-group">
+        <label for="puntos">Puntos *</label>
+        <input
+          type="number"
+          id="puntos"
+          formControlName="puntos"
+          placeholder="Ej: 100"
+          min="1">
+        <small class="error" *ngIf="generateForm.get('puntos')?.errors?.['required'] && generateForm.get('puntos')?.touched">
+          Los puntos son obligatorios
+        </small>
+        <small class="error" *ngIf="generateForm.get('puntos')?.errors?.['min']">
+          Los puntos deben ser mayor a 0
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <input
+          type="text"
+          id="descripcion"
+          formControlName="descripcion"
+          placeholder="Ej: Bono de bienvenida">
+      </div>
+
+      <div class="form-group">
+        <label for="dias_expiracion">Días de expiración</label>
+        <input
+          type="number"
+          id="dias_expiracion"
+          formControlName="dias_expiracion"
+          placeholder="Dejar vacío para sin expiración"
+          min="1">
+        <small class="hint">Dejar vacío si no quieres que expire</small>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            formControlName="uso_multiple">
+          <span>Permitir uso múltiple</span>
+        </label>
+        <small class="hint">Si está marcado, el QR se puede usar varias veces</small>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="generating || generateForm.invalid">
+          {{ generating ? 'Generando...' : 'Generar QR' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal de Vista de QR -->
+<div class="modal-overlay" *ngIf="showViewModal && selectedQR" (click)="closeViewModal()">
+  <div class="modal-content modal-qr-view" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Código QR #{{ selectedQR.id_qr }}</h2>
+      <button class="close-btn" (click)="closeViewModal()">✕</button>
+    </div>
+
+    <div class="qr-view-content">
+      <!-- Imagen del QR -->
+      <div class="qr-image-container">
+        <img [src]="selectedQR.qrCodeImage" alt="Código QR" class="qr-image">
+      </div>
+
+      <!-- URL debajo del QR -->
+      <div class="qr-url-container">
+        <p class="url-label">En caso de no poder escanear, usa este link:</p>
+        <div class="url-box">
+          <input
+            type="text"
+            [value]="selectedQR.canjeUrl"
+            readonly
+            class="url-input">
+          <button
+            class="btn-copy"
+            (click)="copyToClipboard(selectedQR.canjeUrl || '')">
+            Copiar
+          </button>
+        </div>
+        <a
+          [href]="selectedQR.canjeUrl"
+          target="_blank"
+          class="url-link">
+          {{ selectedQR.canjeUrl }}
+        </a>
+      </div>
+
+      <!-- Información del QR -->
+      <div class="qr-info-section">
+        <div class="info-row">
+          <span class="info-label">Puntos:</span>
+          <span class="info-value points-highlight">{{ selectedQR.puntos }} puntos</span>
+        </div>
+        <div class="info-row" *ngIf="selectedQR.descripcion">
+          <span class="info-label">Descripción:</span>
+          <span class="info-value">{{ selectedQR.descripcion }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Estado:</span>
+          <span class="badge" [ngClass]="getEstadoBadgeClass(selectedQR.estado)">
+            {{ getEstadoIcon(selectedQR.estado) }} {{ selectedQR.estado | uppercase }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Creado:</span>
+          <span class="info-value">{{ selectedQR.fecha_creacion | date:'medium' }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedQR.fecha_expiracion">
+          <span class="info-label">Expira:</span>
+          <span class="info-value">{{ selectedQR.fecha_expiracion | date:'medium' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Veces usado:</span>
+          <span class="info-value">{{ selectedQR.veces_usado }}</span>
+        </div>
+        <div class="info-row" *ngIf="selectedQR.uso_multiple">
+          <span class="badge badge-info">Uso Múltiple Habilitado</span>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="qr-view-actions">
+        <button class="btn-primary" (click)="downloadQR(selectedQR)">
+          Descargar QR
+        </button>
+        <button
+          class="btn-warning"
+          (click)="regenerateQR(selectedQR); closeViewModal()"
+          *ngIf="selectedQR.estado !== 'valido'">
+          Regenerar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+<div class="puntos-wrapper">
+  <div class="puntos-container">
+    <div class="header">
+      <h1>Mis Puntos</h1>
+      <p class="subtitle">Revisa tus puntos acumulados y tu historial de canjes</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <p>Cargando información...</p>
+    </div>
+
+    <div class="error-box" *ngIf="error && !loading">
+      <h3>Error</h3>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div class="content" *ngIf="!loading && !error">
+      <div class="puntos-card" *ngIf="cliente">
+        <div class="card-header">
+          <h2>{{ cliente.nombre }}</h2>
+          <p class="email">{{ cliente.correo }}</p>
+        </div>
+        <div class="puntos-display">
+          <div class="puntos-numero">{{ cliente.puntos }}</div>
+          <div class="puntos-label">Puntos Acumulados</div>
+        </div>
+        <div class="card-footer">
+          <p>Miembro desde: {{ cliente.fecha_registro | date:'mediumDate' }}</p>
+        </div>
+      </div>
+
+      <div class="sin-puntos-card" *ngIf="!cliente">
+        <h3>Aún no tienes puntos</h3>
+        <p>Canjea un código QR para comenzar a acumular puntos</p>
+      </div>
+
+      <div class="historial-section">
+        <h2>Historial de Canjes</h2>
+
+        <div class="canjes-list" *ngIf="canjes.length > 0">
+          <div class="canje-item" *ngFor="let canje of canjes">
+            <div class="canje-header">
+              <span class="fecha">{{ canje.fecha_canje | date:'short' }}</span>
+              <span class="puntos-badge">+{{ canje.puntos_aplicados }} puntos</span>
+            </div>
+            <div class="canje-body">
+              <p *ngIf="canje.qr_descripcion">{{ canje.qr_descripcion }}</p>
+              <p *ngIf="!canje.qr_descripcion">Código QR canjeado</p>
+            </div>
+            <div class="canje-footer">
+              <span>{{ canje.puntos_anteriores }} → {{ canje.puntos_nuevos }} puntos</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sin-canjes" *ngIf="canjes.length === 0">
+          <p>No tienes canjes registrados aún</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

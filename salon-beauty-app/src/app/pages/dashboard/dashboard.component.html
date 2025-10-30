@@ -1,10 +1,92 @@
-<div class="dashboard-container" *ngIf="admin">
-  <h2>Bienvenido, {{ admin.nombre }}</h2>
-  <p>Correo: {{ admin.correo }}</p>
-  <p>Estado: {{ admin.activo === 'S' ? 'Activo' : 'Inactivo' }}</p>
-  <p>Último acceso: {{ admin.ultimo_acceso | date:'short' }}</p>
-</div>
+<div class="dashboard-wrapper">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p class="welcome-text" *ngIf="admin">Bienvenido, <strong>{{ admin.nombre }}</strong></p>
+  </div>
 
-<div class="dashboard-container" *ngIf="!admin">
-  <p>Cargando información del usuario...</p>
+  <!-- Admin Info Card -->
+  <div class="info-card" *ngIf="admin">
+    <h3>Información del Administrador</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="label">Correo:</span>
+        <span class="value">{{ admin.correo }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Estado:</span>
+        <span class="value" [class.active]="admin.activo === 'S'">
+          {{ admin.activo === 'S' ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+      <div class="info-item">
+        <span class="label">Último acceso:</span>
+        <span class="value">{{ admin.ultimo_acceso | date:'short' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Statistics Section -->
+  <div class="qr-stats-section">
+    <div class="section-header">
+      <h2>Estadísticas de Códigos QR</h2>
+      <a routerLink="/qr-management" class="btn-manage">Administrar QR</a>
+    </div>
+
+    <div class="stats-loading" *ngIf="loadingStats">
+      <p>Cargando estadísticas...</p>
+    </div>
+
+    <div class="stats-grid" *ngIf="qrStats && !loadingStats">
+      <div class="stat-card total">
+        <div class="stat-content">
+          <h3>{{ qrStats.total_qrs }}</h3>
+          <p>Total Códigos QR</p>
+        </div>
+      </div>
+
+      <div class="stat-card valid">
+        <div class="stat-content">
+          <h3>{{ qrStats.qrs_validos }}</h3>
+          <p>Códigos Válidos</p>
+        </div>
+      </div>
+
+      <div class="stat-card invalid">
+        <div class="stat-content">
+          <h3>{{ qrStats.qrs_invalidos }}</h3>
+          <p>Códigos Inválidos</p>
+        </div>
+      </div>
+
+      <div class="stat-card expired">
+        <div class="stat-content">
+          <h3>{{ qrStats.qrs_expirados }}</h3>
+          <p>Códigos Expirados</p>
+        </div>
+      </div>
+
+      <div class="stat-card redemptions">
+        <div class="stat-content">
+          <h3>{{ qrStats.total_canjes }}</h3>
+          <p>Total Canjes</p>
+        </div>
+      </div>
+
+      <div class="stat-card points">
+        <div class="stat-content">
+          <h3>{{ qrStats.total_puntos_canjeados }}</h3>
+          <p>Puntos Canjeados</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-error" *ngIf="!qrStats && !loadingStats">
+      <p>No se pudieron cargar las estadísticas</p>
+      <button (click)="loadQRStats()" class="btn-retry">Reintentar</button>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="!admin">
+    <p>Cargando información del usuario...</p>
+  </div>
 </div>

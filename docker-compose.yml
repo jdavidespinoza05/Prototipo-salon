@@ -1,0 +1,74 @@
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: salon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: salon_beauty
+      POSTGRES_USER: salon_user
+      POSTGRES_PASSWORD: salon_pass123
+      POSTGRES_HOST_AUTH_METHOD: md5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./salon-beauty-app/database/postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U salon_user -d salon_beauty"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - salon-network
+
+  # Backend Node.js
+  backend:
+    build:
+      context: ./salon-beauty-app/backend
+      dockerfile: Dockerfile
+    container_name: salon-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: salon_beauty
+      DB_USER: salon_user
+      DB_PASSWORD: salon_pass123
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - salon-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Angular con Nginx
+  frontend:
+    build:
+      context: ./salon-beauty-app
+      dockerfile: Dockerfile
+    container_name: salon-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - salon-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  salon-network:
+    driver: bridge

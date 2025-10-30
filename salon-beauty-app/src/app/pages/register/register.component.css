@@ -1,4 +1,4 @@
-.login-wrapper {
+.register-wrapper {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -6,7 +6,7 @@
   padding: 20px;
 }
 
-.login-container {
+.register-container {
   max-width: 420px;
   width: 100%;
   padding: 40px;
@@ -17,10 +17,17 @@
 
 h2 {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
   color: #333;
   font-size: 24px;
   font-weight: 600;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 25px;
 }
 
 .form-group {
@@ -101,68 +108,55 @@ button:active:not(:disabled) {
   border-left: 4px solid #e53935;
 }
 
-/* Link de recuperar contraseña */
-.forgot-password {
+/* Mensaje de éxito */
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+  border-left: 4px solid #4caf50;
+}
+
+/* Link de login */
+.login-link {
   text-align: center;
   margin-top: 20px;
 }
 
-.forgot-password a {
-  color: #666;
-  font-size: 14px;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.forgot-password a:hover {
-  color: #000;
-  text-decoration: underline;
-}
-
-/* Animación de loading en el botón */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-button span {
-  display: inline-block;
-}
-
-/* Link de registro */
-.register-link {
-  text-align: center;
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #eee;
-}
-
-.register-link p {
+.login-link p {
   color: #666;
   font-size: 14px;
   margin: 0;
 }
 
-.register-link a {
+.login-link a {
   color: #000;
   font-weight: 500;
   text-decoration: none;
+  cursor: pointer;
   transition: color 0.3s ease;
 }
 
-.register-link a:hover {
+.login-link a:hover {
   color: #333;
   text-decoration: underline;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-  .login-container {
+  .register-container {
     margin: 40px 20px;
     padding: 20px;
   }
 
   h2 {
     font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 13px;
   }
 }
